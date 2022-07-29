@@ -1,0 +1,82 @@
+name: レビュー用デプロイ
+
+on:
+  # develop ブランチに対する Pull Request で発動
+  pull_request:
+    branches:
+      - develop
+    types:
+      - opened
+      - synchronize
+      - labeled
+
+jobs:
+  deploy:
+    name: レビュー用デプロイ
+
+    permissions:
+      contents: read
+      id-token: write
+      pull-requests: write
+
+    runs-on: ubuntu-latest
+
+    # PReview label がついている場合のみ実行する
+    if: |
+      ((github.event.action == 'labeled') && (github.event.label.name == 'PReview'))
+      ||
+      ((github.event.action == 'synchronize') && contains(github.event.pull_request.labels.*.name, 'PReview'))
+
+    env:
+      GCP_WORKLOAD_IDENTITY_PROVIDER: projects/181168524791/locations/global/workloadIdentityPools/ssg-example/providers/gh-ssg-example
+      GCP_SERVICE_ACCOUNT: gha-ssg-example@teraoka-test-331901.iam.gserviceaccount.com
+      BUCKET_NAME: ssg-example-review-n9k0
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Node.js のインストール
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+
+      - name: npm install
+        run: |
+          npm install -g @gridsome/cli
+
+      - name: gridsome build
+        run: |
+          gridsome build
+        working-directory: ./mysite
+
+      - name: Authenticate to Google Cloud
+        id: auth
+        uses: google-github-actions/auth@v0
+        with:
+          workload_identity_provider: ${{ env.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ env.GCP_SERVICE_ACCOUNT }}
+
+      - name: Deploy review
+        run: |
+          gcloud alpha storage rm -r gs://${BUCKET_NAME}/pr-${{ github.event.pull_request.number }} || true
+          gcloud alpha storage cp -r --cache-control="private, max-age=60" ./mysite/dist gs://${BUCKET_NAME}/pr-${{ github.event.pull_request.number }}
+          echo "### デプロイしました! :rocket:" >> $GITHUB_STEP_SUMMARY
+          echo "https://storage.googleapis.com/${BUCKET_NAME}/pr-${{ github.event.pull_request.number }}/index.html" >> $GITHUB_STEP_SUMMARY
+
+      - name: URL を書き込む既存のコメントを検索
+        uses: peter-evans/find-comment@v2
+        id: fc
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-author: 'github-actions[bot]'
+          body-includes: レビュー用の URL です
+
+      - name: Pull Request のコメントに URL を追加
+        uses: peter-evans/create-or-update-comment@v2
+        with:
+          comment-id: ${{ steps.fc.outputs.comment-id }}
+          issue-number: ${{ github.event.pull_request.number }}
+          edit-mode: replace
+          body: |
+            レビュー用の URL です
+            https://storage.googleapis.com/${BUCKET_NAME}/pr-${{ github.event.pull_request.number }}/index.html
