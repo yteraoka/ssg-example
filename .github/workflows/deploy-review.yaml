@@ -40,14 +40,18 @@ jobs:
         with:
           node-version: 16
 
-      - name: npm install
+      - name: install gridsome 
         run: |
-          npm install -g @gridsome/cli
+          yarn global add @gridsome/cli
+          #npm install --location=global @gridsome/cli
+
+      - name: yarn install
+        run: |
+          yarn install
+        working-directory: ./mysite
 
       - name: gridsome build
         run: |
-          pwd
-          ls
           gridsome build
         working-directory: ./mysite
 
