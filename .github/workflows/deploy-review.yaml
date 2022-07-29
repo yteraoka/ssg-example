@@ -85,4 +85,4 @@ jobs:
           edit-mode: replace
           body: |
             レビュー用の URL です
-            https://storage.googleapis.com/${BUCKET_NAME}/pr-${{ github.event.pull_request.number }}/index.html
+            https://storage.googleapis.com/${{ env.BUCKET_NAME }}/pr-${{ github.event.pull_request.number }}/index.html
