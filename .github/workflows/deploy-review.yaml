@@ -46,6 +46,8 @@ jobs:
 
       - name: gridsome build
         run: |
+          pwd
+          ls
           gridsome build
         working-directory: ./mysite
 
