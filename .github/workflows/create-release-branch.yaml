@@ -179,7 +179,7 @@ jobs:
         uses: peter-evans/find-comment@v2
         id: fc
         with:
-          issue-number: ${{ github.event.pull_request.number }}
+          issue-number: ${{ needs.create-pull-request.outputs.pr-number }}
           comment-author: 'github-actions[bot]'
           body-includes: Staging 環境にデプロイしました
 
@@ -187,7 +187,7 @@ jobs:
         uses: peter-evans/create-or-update-comment@v2
         with:
           comment-id: ${{ steps.fc.outputs.comment-id }}
-          issue-number: ${{ github.event.pull_request.number }}
+          issue-number: ${{ needs.create-pull-request.outputs.pr-number }}
           edit-mode: replace
           body: |
             Staging 環境にデプロイしました
