@@ -68,7 +68,8 @@ jobs:
       - name: Get current version
         id: current-version
         run: |
-          current_version=$(jq -r .version ./mysite/package.json)
+          current_version=$(cat version.txt)
+          #current_version=$(jq -r .version ./mysite/package.json)
           echo ::set-output name=value::${current_version}
 
       - name: Set up Ruby 3.1
