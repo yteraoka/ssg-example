@@ -192,7 +192,7 @@ jobs:
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": "Release 用 [Pull Request #${{ needs.bump-version-and-merge.outputs.release-pr-number }}](${{ needs.bump-version-and-merge.outputs.release-pr-url }}) が作成されました。"
+                    "text": "本番に ${{ github.event.inputs.releaseVersion }} <PR #${{ needs.bump-version-and-merge.outputs.release-pr-number }}|${{ needs.bump-version-and-merge.outputs.release-pr-url }}> をデプロイしました。"
                   }
                 }
               ]
