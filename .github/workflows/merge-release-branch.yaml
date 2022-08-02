@@ -1,0 +1,183 @@
+name: "[手動]本番デプロイ"
+
+# - 実行時に release branch を選択する
+# - merge 前に package.json の version を新しい値に更新して release branch を push する
+# - Pull Request の id を取得
+# - pascalgn/automerge-action で main branch への merge を実行
+# - version の更新を develop に反映するための Pull Request を作成する
+#   - これって merge するんだっけ？
+# - main branch を checkout して tag を作成して Push (actions/create-release)
+# - production への deploy
+# - 完了通知
+
+on:
+  # 手動実行
+  workflow_dispatch:
+    inputs:
+      releaseVersion:
+        description: Bump version to
+        required: true
+        default: x.y.z
+
+jobs:
+  bump-version-and-merge:
+    name: Version 更新と main への Merge
+
+    runs-on: ubuntu-20.04
+
+    # release branch を選択しなかった場合は何もしない
+    if: startsWith(github.ref_name, 'release/')
+
+    outputs:
+      release-pr-number: ${{ steps.pr-info.outputs.pr-number }}
+      release-pr-url: ${{ steps.pr-info.outputs.pr-url }}
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Version ファイルを更新
+        run: |
+          echo "${{ github.event.inputs.releaseVersion }}" > ./version.txt
+
+      - name: Version 情報の更新を Commit
+        uses: stefanzweifel/git-auto-commit-action@v4.2.0
+        with:
+          commit_message: Bump version to ${{ github.event.inputs.releaseVersion }}
+
+      - name: PR の id と URL を取得
+        id: pr-info
+        run: |
+          pr_number=$(gh pr list --json number,headRefName,baseRefName,url --state open | jq '.[] | select(.headRefName == "${{ github.ref_name }}" and .baseRefName == "main") | .number' -r)
+          pr_url=$(gh pr list --json number,headRefName,baseRefName,url --state open | jq '.[] | select(.headRefName == "${{ github.ref_name }}" and .baseRefName == "main") | .url' -r)
+          echo "pr_number=${pr_number}"
+          echo "pr_url=${pr_url}"
+          if [ -z "$pr_number" ] ; then
+            echo "can't get pr_number"
+            exit 1
+          fi
+          echo "::set-output name=pr-number::${pr_number}"
+          echo "::set-output name=pr-url::${pr_url}"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: main ブランチへの PR を Merge する
+        uses: pascalgn/automerge-action@v0.15.3
+        env:
+          MERGE_LABELS: ""
+          MERGE_DELETE_BRANCH: false
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          PULL_REQUEST: "${{ steps.pr-info.outputs.pr_number }}"
+
+  apply-version-to-develop:
+    name: Version 更新を develop に反映
+
+    needs:
+      - bump-version-and-merge
+
+    runs-on: ubuntu-20.04
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: develop ブランチへの PR 作成
+        run: |
+          gh pr create \
+            --head ${{ github.ref_name }} \
+            --base develop \
+            --title "Bump flux-site-api version to ${{ github.event.inputs.releaseVersion }}" \
+            --body "Merge automatically ${{ github.ref_name }} into develop"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: develop ブランチへの PR の id と URL を取得
+        id: develop-pr-info
+        run: |
+          pr_number=$(gh pr list --json number,headRefName,baseRefName,url --state open | jq '.[] | select(.headRefName == "${{ github.ref_name }}" and .baseRefName == "develop") | .number' -r)
+          pr_url=$(gh pr list --json number,headRefName,baseRefName,url --state open | jq '.[] | select(.headRefName == "${{ github.ref_name }}" and .baseRefName == "develop") | .url' -r)
+          echo "pr_number=${pr_number}"
+          echo "pr_url=${pr_url}"
+          if [ -z "$pr_number" ] ; then
+            echo "can't get pr_number"
+            exit 1
+          fi
+          echo "::set-output name=pr-number::${pr_number}"
+          echo "::set-output name=pr-url::${pr_url}"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  create-release:
+    name: tag 作成
+
+    needs:
+      - apply-version-to-develop
+
+    runs-on: ubuntu-20.04
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: main
+
+      - name: tag の作成
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: release-${{ github.event.inputs.releaseVersion }}
+
+  deploy-production:
+    name: 本番デプロイ
+
+    needs:
+      - create-release
+
+    permissions:
+      contents: read
+      id-token: write
+      pull-requests: write
+
+    runs-on: ubuntu-20.04
+
+    env:
+      GCP_WORKLOAD_IDENTITY_PROVIDER: projects/181168524791/locations/global/workloadIdentityPools/ssg-example/providers/gh-ssg-example
+      GCP_SERVICE_ACCOUNT: gha-ssg-example@teraoka-test-331901.iam.gserviceaccount.com
+      BUCKET_NAME: ssg-example-prod-n9k0
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: release-${{ github.event.inputs.releaseVersion }}
+
+      - name: Authenticate to Google Cloud
+        id: auth
+        uses: google-github-actions/auth@v0
+        with:
+          workload_identity_provider: ${{ env.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ env.GCP_SERVICE_ACCOUNT }}
+
+      - name: Deploy production
+        run: |
+          gcloud alpha storage rm -r gs://${BUCKET_NAME}/\* || true
+          gcloud alpha storage cp -r --cache-control="private, max-age=60" ./mysite/dist/* gs://${BUCKET_NAME}/
+          echo "### デプロイしました! :rocket:" >> $GITHUB_STEP_SUMMARY
+          echo "https://storage.googleapis.com/${BUCKET_NAME}/" >> $GITHUB_STEP_SUMMARY
+
+      - name: Slack へ通知
+        uses: slackapi/slack-github-action@v1.19.0
+        with:
+          payload: |
+            {
+              "text": "本番にデプロイされました\n${{ needs.bump-version-and-merge.outputs.release-pr-number }}",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "Release 用 [Pull Request #${{ needs.bump-version-and-merge.outputs.release-pr-number }}](${{ needs.bump-version-and-merge.outputs.release-pr-url }}) が作成されました。"
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
