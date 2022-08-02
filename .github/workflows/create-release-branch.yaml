@@ -96,6 +96,8 @@ jobs:
           pr_url=$(gh pr list --json number,headRefName,baseRefName,url --state open | jq '.[] | select(.headRefName == "${{ needs.create-release-branch.outputs.release-branch-name }}" and .baseRefName == "main") | .url' -r)
           echo "::set-output name=pr-number::${pr_number}"
           echo "::set-output name=pr-url::${pr_url}"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Slack へ通知
         uses: slackapi/slack-github-action@v1.19.0

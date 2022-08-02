@@ -57,6 +57,8 @@ jobs:
           fi
           echo "::set-output name=pr-number::${pr_number}"
           echo "::set-output name=pr-url::${pr_url}"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: main ブランチへの PR を Merge する
         uses: pascalgn/automerge-action@v0.15.3
@@ -100,6 +102,8 @@ jobs:
           fi
           echo "::set-output name=pr-number::${pr_number}"
           echo "::set-output name=pr-url::${pr_url}"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   create-release:
     name: tag 作成
