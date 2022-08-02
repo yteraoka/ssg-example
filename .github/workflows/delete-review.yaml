@@ -47,7 +47,9 @@ jobs:
           comment-author: 'github-actions[bot]'
           body-includes: レビュー用の URL です
 
+      # find-comment で見つからなければ skip
       - name: Pull Request のコメントに URL を追加
+        if: steps.fc.outputs.comment-id != ''
         uses: peter-evans/create-or-update-comment@v2
         with:
           comment-id: ${{ steps.fc.outputs.comment-id }}
