@@ -111,7 +111,7 @@ jobs:
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": "Release 用 <Pull Request #${{ steps.pr-info.outputs.pr-number }}|${{ steps.pr-info.outputs.pr-url }}> が作成されました。"
+                    "text": "Release 用 <${{ steps.pr-info.outputs.pr-url }}|Pull Request #${{ steps.pr-info.outputs.pr-number }}> が作成されました。"
                   }
                 }
               ]
