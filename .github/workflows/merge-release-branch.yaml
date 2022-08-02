@@ -148,6 +148,25 @@ jobs:
         with:
           ref: release-${{ github.event.inputs.releaseVersion }}
 
+      - name: Node.js のインストール
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+
+      - name: install gridsome 
+        run: |
+          yarn global add @gridsome/cli
+
+      - name: yarn install
+        run: |
+          yarn install
+        working-directory: ./mysite
+
+      - name: gridsome build
+        run: |
+          gridsome build
+        working-directory: ./mysite
+
       - name: Authenticate to Google Cloud
         id: auth
         uses: google-github-actions/auth@v0
