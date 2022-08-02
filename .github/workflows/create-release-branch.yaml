@@ -86,7 +86,7 @@ jobs:
           GIT_PR_RELEASE_BRANCH_PRODUCTION: main
           GIT_PR_RELEASE_BRANCH_STAGING: ${{ needs.create-release-branch.outputs.release-branch-name }}
           GIT_PR_RELEASE_TEMPLATE: '.github/git-pr-release-template.erb'
-          CURRENT_VERSION: ${{ steps.latest-tag.outputs.value }}
+          CURRENT_VERSION: ${{ steps.current-version.outputs.value }}
           TZ: Asia/Tokyo
 
       # release branch から main branch への Pull Request の id, url を取得
