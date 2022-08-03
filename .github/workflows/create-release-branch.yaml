@@ -68,7 +68,8 @@ jobs:
       - name: Get current version
         id: current-version
         run: |
-          current_version=$(jq -r .version ./mysite/package.json)
+          current_version=$(cat version.txt)
+          #current_version=$(jq -r .version ./mysite/package.json)
           echo ::set-output name=value::${current_version}
 
       - name: Set up Ruby 3.1
@@ -85,7 +86,7 @@ jobs:
           GIT_PR_RELEASE_BRANCH_PRODUCTION: main
           GIT_PR_RELEASE_BRANCH_STAGING: ${{ needs.create-release-branch.outputs.release-branch-name }}
           GIT_PR_RELEASE_TEMPLATE: '.github/git-pr-release-template.erb'
-          CURRENT_VERSION: ${{ steps.latest-tag.outputs.value }}
+          CURRENT_VERSION: ${{ steps.current-version.outputs.value }}
           TZ: Asia/Tokyo
 
       # release branch から main branch への Pull Request の id, url を取得
@@ -110,7 +111,7 @@ jobs:
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": "Release 用 [Pull Request #${{ steps.pr-info.outputs.pr-number }}](${{ steps.pr-info.outputs.pr-url }}) が作成されました。"
+                    "text": "Release 用 <${{ steps.pr-info.outputs.pr-url }}|Pull Request #${{ steps.pr-info.outputs.pr-number }}> が作成されました。"
                   }
                 }
               ]
