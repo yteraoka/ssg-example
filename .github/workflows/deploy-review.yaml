@@ -28,3 +28,4 @@ jobs:
       bucket-name: ssg-example-review-n9k0
       url: "https://storage.googleapis.com/ssg-example-review-n9k0/pr-${{ github.event.pull_request.number }}/index.html"
       issue-number: ${{ github.event.pull_request.number }}
+      preview-id: pr-${{ github.event.pull_request.number }}
