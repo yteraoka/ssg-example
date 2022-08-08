@@ -166,36 +166,14 @@ jobs:
         with:
           ref: v${{ github.event.inputs.releaseVersion }}
 
-      - name: Node.js のインストール
-        uses: actions/setup-node@v3
+      - uses: ./.github/workflows/reusable-deploy.yaml
         with:
-          node-version: 16
+          workload-identity-provider: ${{ env.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service-account: ${{ env.GCP_SERVICE_ACCOUNT }}
+          bucket-name: ${{ env.BUCKET_NAME }}
 
-      - name: install gridsome 
+      - name: Add URL to summary
         run: |
-          yarn global add @gridsome/cli
-
-      - name: yarn install
-        run: |
-          yarn install
-        working-directory: ./mysite
-
-      - name: gridsome build
-        run: |
-          gridsome build
-        working-directory: ./mysite
-
-      - name: Authenticate to Google Cloud
-        id: auth
-        uses: google-github-actions/auth@v0
-        with:
-          workload_identity_provider: ${{ env.GCP_WORKLOAD_IDENTITY_PROVIDER }}
-          service_account: ${{ env.GCP_SERVICE_ACCOUNT }}
-
-      - name: Deploy production
-        run: |
-          gcloud alpha storage rm -r gs://${BUCKET_NAME}/\* || true
-          gcloud alpha storage cp -r --cache-control="private, max-age=60" ./mysite/dist/* gs://${BUCKET_NAME}/
           echo "### デプロイしました! :rocket:" >> $GITHUB_STEP_SUMMARY
           echo "https://storage.googleapis.com/${BUCKET_NAME}/" >> $GITHUB_STEP_SUMMARY
 
