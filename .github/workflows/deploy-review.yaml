@@ -42,6 +42,7 @@ jobs:
           bucket-name: ${{ env.BUCKET_NAME }}
 
       - name: Add URL to summary
+        run: |
           echo "### デプロイしました! :rocket:" >> $GITHUB_STEP_SUMMARY
           echo "https://storage.googleapis.com/${BUCKET_NAME}/pr-${{ github.event.pull_request.number }}/index.html" >> $GITHUB_STEP_SUMMARY
 
