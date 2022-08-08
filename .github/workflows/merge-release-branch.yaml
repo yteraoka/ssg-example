@@ -148,25 +148,14 @@ jobs:
     needs:
       - create-release
 
-    permissions:
-      contents: read
-      id-token: write
-      pull-requests: write
-
-    runs-on: ubuntu-20.04
-
-    env:
-      GCP_WORKLOAD_IDENTITY_PROVIDER: projects/181168524791/locations/global/workloadIdentityPools/ssg-example/providers/gh-ssg-example
-      GCP_SERVICE_ACCOUNT: gha-ssg-example@teraoka-test-331901.iam.gserviceaccount.com
-      BUCKET_NAME: ssg-example-prod-n9k0
-
     uses: ./.github/workflows/reusable-deploy.yaml
     with:
       checkout_ref: v${{ github.event.inputs.releaseVersion }}
-      workload-identity-provider: ${{ env.GCP_WORKLOAD_IDENTITY_PROVIDER }}
-      service-account: ${{ env.GCP_SERVICE_ACCOUNT }}
-      bucket-name: ${{ env.BUCKET_NAME }}
-      url: "https://storage.googleapis.com/${BUCKET_NAME}/"
+      workload-identity-provider: projects/181168524791/locations/global/workloadIdentityPools/ssg-example/providers/gh-ssg-example
+      service-account: gha-ssg-example@teraoka-test-331901.iam.gserviceaccount.com
+      bucket-name: ssg-example-prod-n9k0
+      url: "https://storage.googleapis.com/ssg-example-prod-n9k0/index.html"
+
 
   notify-to-slack:
     name: Slack へ通知
