@@ -12,6 +12,9 @@ on:
       bucket-name:
         required: true
         type: string
+      checkout_ref:
+        required: true
+        type: string
 
 jobs:
   deploy-frontend:
@@ -25,6 +28,10 @@ jobs:
     runs-on: ubuntu-20.04
 
     steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ inputs.checkout_ref }}
+
       - name: Node.js のインストール
         uses: actions/setup-node@v3
         with:

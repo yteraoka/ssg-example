@@ -161,13 +161,9 @@ jobs:
       BUCKET_NAME: ssg-example-prod-n9k0
 
     steps:
-      - name: release tag を checkout
-        uses: actions/checkout@v3
-        with:
-          ref: v${{ github.event.inputs.releaseVersion }}
-
       - uses: ./.github/workflows/reusable-deploy.yaml
         with:
+          checkout_ref: v${{ github.event.inputs.releaseVersion }}
           workload-identity-provider: ${{ env.GCP_WORKLOAD_IDENTITY_PROVIDER }}
           service-account: ${{ env.GCP_SERVICE_ACCOUNT }}
           bucket-name: ${{ env.BUCKET_NAME }}
