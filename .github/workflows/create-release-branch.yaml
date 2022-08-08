@@ -127,7 +127,6 @@ jobs:
 
     needs:
       - create-release-branch
-      - create-pull-request
 
     uses: ./.github/workflows/reusable-deploy.yaml
     with:
