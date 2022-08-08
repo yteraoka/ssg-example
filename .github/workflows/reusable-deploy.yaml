@@ -20,7 +20,7 @@ on:
         type: string
       issue-number:
         required: false
-        type: number
+        type: string
       preview-id:
         required: false
         type: string
