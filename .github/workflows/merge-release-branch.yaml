@@ -161,6 +161,7 @@ jobs:
     name: Slack へ通知
 
     needs:
+      - bump-version-and-merge
       - deploy-production
 
     runs-on: ubuntu-20.04
