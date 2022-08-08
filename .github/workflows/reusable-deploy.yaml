@@ -1,0 +1,105 @@
+name: Reusable Deploy Workflow
+
+on:
+  workflow_call:
+    inputs:
+      workload-identity-provider:
+        required: true
+        type: string
+      service-account:
+        required: true
+        type: string
+      bucket-name:
+        required: true
+        type: string
+      checkout_ref:
+        required: true
+        type: string
+      url:
+        required: true
+        type: string
+      issue-number:
+        required: false
+        type: number
+      preview-id:
+        required: false
+        type: string
+
+jobs:
+  deploy-frontend:
+    name: Frontend の deploy
+
+    permissions:
+      contents: read
+      id-token: write
+      pull-requests: write
+
+    runs-on: ubuntu-20.04
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ inputs.checkout_ref }}
+
+      - name: Node.js のインストール
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+
+      - name: install gridsome 
+        run: |
+          yarn global add @gridsome/cli
+
+      - name: yarn install
+        run: |
+          yarn install
+        working-directory: ./mysite
+
+      - name: gridsome build
+        run: |
+          gridsome build
+        working-directory: ./mysite
+
+      - name: Authenticate to Google Cloud
+        id: auth
+        uses: google-github-actions/auth@v0
+        with:
+          workload_identity_provider: ${{ inputs.workload-identity-provider }}
+          service_account: ${{ inputs.service-account }}
+
+      - name: Deploy Frontend
+        if: inputs.preview-id == ''
+        run: |
+          gcloud alpha storage rm -r gs://${{ inputs.bucket-name }}/\* || true
+          gcloud alpha storage cp -r ./mysite/dist/* gs://${{ inputs.bucket-name }}/
+
+      - name: Deploy Frontend for Pull Request
+        if: inputs.preview-id != ''
+        run: |
+          gcloud alpha storage rm -r gs://${{ inputs.bucket-name }}/${{ inputs.preview-id }} || true
+          gcloud alpha storage cp -r --cache-control="private, max-age=60" ./mysite/dist gs://${{ inputs.bucket-name }}/${{ inputs.preview-id }}
+      - name: Add URL to summary
+        run: |
+          echo "### デプロイしました! :rocket:" >> $GITHUB_STEP_SUMMARY
+          echo "${{ inputs.url }}" >> $GITHUB_STEP_SUMMARY
+
+      - name: URL を書き込む既存のコメントを検索
+        uses: peter-evans/find-comment@v2
+        if: inputs.issue-number != ''
+        id: fc
+        with:
+          issue-number: ${{ inputs.issue-number }}
+          comment-author: 'github-actions[bot]'
+          body-includes: レビュー用の URL です
+
+      - name: Pull Request のコメントに URL を追加
+        uses: peter-evans/create-or-update-comment@v2
+        if: inputs.issue-number != ''
+        with:
+          comment-id: ${{ steps.fc.outputs.comment-id }}
+          issue-number: ${{ inputs.issue-number }}
+          edit-mode: replace
+          body: |
+            レビュー用の URL です
+            ${{ inputs.url }}
+
