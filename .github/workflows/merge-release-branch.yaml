@@ -139,6 +139,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: v${{ github.event.inputs.releaseVersion }}
+          release_name: v${{ github.event.inputs.releaseVersion }}
 
 
   deploy-production:
