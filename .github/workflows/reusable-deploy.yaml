@@ -77,7 +77,7 @@ jobs:
         if: inputs.preview-id != ''
         run: |
           gcloud alpha storage rm -r gs://${{ inputs.bucket-name }}/${{ inputs.preview-id }} || true
-          gcloud alpha storage cp -r --cache-control="private, max-age=60" ./mysite/dist/* gs://${{ inputs.bucket-name }}/${{ inputs.preview-id }}
+          gcloud alpha storage cp -r --cache-control="private, max-age=60" ./mysite/dist gs://${{ inputs.bucket-name }}/${{ inputs.preview-id }}
       - name: Add URL to summary
         run: |
           echo "### デプロイしました! :rocket:" >> $GITHUB_STEP_SUMMARY
