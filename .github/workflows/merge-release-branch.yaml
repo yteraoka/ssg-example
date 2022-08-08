@@ -138,7 +138,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: release-${{ github.event.inputs.releaseVersion }}
+          tag_name: v${{ github.event.inputs.releaseVersion }}
 
 
   deploy-production:
@@ -163,7 +163,7 @@ jobs:
       - name: release tag を checkout
         uses: actions/checkout@v3
         with:
-          ref: release-${{ github.event.inputs.releaseVersion }}
+          ref: v${{ github.event.inputs.releaseVersion }}
 
       - name: Node.js のインストール
         uses: actions/setup-node@v3
