@@ -32,33 +32,11 @@ jobs:
       GCP_SERVICE_ACCOUNT: gha-ssg-example@teraoka-test-331901.iam.gserviceaccount.com
       BUCKET_NAME: ssg-example-review-n9k0
 
-    steps:
-      - uses: ./.github/workflows/reusable-deploy.yaml
-        with:
-          checkout_ref: ${{ github.ref }}
-          workload-identity-provider: ${{ env.GCP_WORKLOAD_IDENTITY_PROVIDER }}
-          service-account: ${{ env.GCP_SERVICE_ACCOUNT }}
-          bucket-name: ${{ env.BUCKET_NAME }}
-
-      - name: Add URL to summary
-        run: |
-          echo "### デプロイしました! :rocket:" >> $GITHUB_STEP_SUMMARY
-          echo "https://storage.googleapis.com/${BUCKET_NAME}/pr-${{ github.event.pull_request.number }}/index.html" >> $GITHUB_STEP_SUMMARY
-
-      - name: URL を書き込む既存のコメントを検索
-        uses: peter-evans/find-comment@v2
-        id: fc
-        with:
-          issue-number: ${{ github.event.pull_request.number }}
-          comment-author: 'github-actions[bot]'
-          body-includes: レビュー用の URL です
-
-      - name: Pull Request のコメントに URL を追加
-        uses: peter-evans/create-or-update-comment@v2
-        with:
-          comment-id: ${{ steps.fc.outputs.comment-id }}
-          issue-number: ${{ github.event.pull_request.number }}
-          edit-mode: replace
-          body: |
-            レビュー用の URL です
-            https://storage.googleapis.com/${{ env.BUCKET_NAME }}/pr-${{ github.event.pull_request.number }}/index.html
+    uses: ./.github/workflows/reusable-deploy.yaml
+    with:
+      checkout_ref: ${{ github.ref }}
+      workload-identity-provider: ${{ env.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+      service-account: ${{ env.GCP_SERVICE_ACCOUNT }}
+      bucket-name: ${{ env.BUCKET_NAME }}
+      url: "https://storage.googleapis.com/${BUCKET_NAME}/pr-${{ github.event.pull_request.number }}/index.html"
+      issue-number: ${{ github.event.pull_request.number }}

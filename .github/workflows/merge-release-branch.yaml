@@ -160,19 +160,23 @@ jobs:
       GCP_SERVICE_ACCOUNT: gha-ssg-example@teraoka-test-331901.iam.gserviceaccount.com
       BUCKET_NAME: ssg-example-prod-n9k0
 
+    uses: ./.github/workflows/reusable-deploy.yaml
+    with:
+      checkout_ref: v${{ github.event.inputs.releaseVersion }}
+      workload-identity-provider: ${{ env.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+      service-account: ${{ env.GCP_SERVICE_ACCOUNT }}
+      bucket-name: ${{ env.BUCKET_NAME }}
+      url: "https://storage.googleapis.com/${BUCKET_NAME}/"
+
+  notify-to-slack:
+    name: Slack へ通知
+
+    needs:
+      - deploy-production
+
+    runs-on: ubuntu-20.04
+
     steps:
-      - uses: ./.github/workflows/reusable-deploy.yaml
-        with:
-          checkout_ref: v${{ github.event.inputs.releaseVersion }}
-          workload-identity-provider: ${{ env.GCP_WORKLOAD_IDENTITY_PROVIDER }}
-          service-account: ${{ env.GCP_SERVICE_ACCOUNT }}
-          bucket-name: ${{ env.BUCKET_NAME }}
-
-      - name: Add URL to summary
-        run: |
-          echo "### デプロイしました! :rocket:" >> $GITHUB_STEP_SUMMARY
-          echo "https://storage.googleapis.com/${BUCKET_NAME}/" >> $GITHUB_STEP_SUMMARY
-
       - name: Slack へ通知
         uses: slackapi/slack-github-action@v1.19.0
         with:

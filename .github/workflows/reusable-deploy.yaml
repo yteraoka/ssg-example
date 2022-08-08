@@ -15,6 +15,12 @@ on:
       checkout_ref:
         required: true
         type: string
+      url:
+        required: true
+        type: string
+      issue-number:
+        requred: false
+        type: number
 
 jobs:
   deploy-frontend:
@@ -62,5 +68,28 @@ jobs:
         run: |
           gcloud alpha storage rm -r gs://${{ inputs.bucket-name }}/\* || true
           gcloud alpha storage cp -r --cache-control="private, max-age=60" ./mysite/dist/* gs://${{ inputs.bucket-name }}/
+      - name: Add URL to summary
+        run: |
           echo "### デプロイしました! :rocket:" >> $GITHUB_STEP_SUMMARY
-          echo "https://storage.googleapis.com/${{ inputs.bucket-name }}/" >> $GITHUB_STEP_SUMMARY
+          echo "${{ inputs.url }}" >> $GITHUB_STEP_SUMMARY
+
+      - name: URL を書き込む既存のコメントを検索
+        uses: peter-evans/find-comment@v2
+        if: inputs.issue-number != ''
+        id: fc
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-author: 'github-actions[bot]'
+          body-includes: レビュー用の URL です
+
+      - name: Pull Request のコメントに URL を追加
+        uses: peter-evans/create-or-update-comment@v2
+        if: inputs.issue-number != ''
+        with:
+          comment-id: ${{ steps.fc.outputs.comment-id }}
+          issue-number: ${{ github.event.pull_request.number }}
+          edit-mode: replace
+          body: |
+            レビュー用の URL です
+            ${{ inputs.url }}
+
