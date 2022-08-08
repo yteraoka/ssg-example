@@ -14,29 +14,17 @@ jobs:
   deploy:
     name: レビュー用デプロイ
 
-    permissions:
-      contents: read
-      id-token: write
-      pull-requests: write
-
-    runs-on: ubuntu-latest
-
     # PReview label がついている場合のみ実行する
     if: |
       ((github.event.action == 'labeled') && (github.event.label.name == 'PReview'))
       ||
       ((github.event.action == 'synchronize') && contains(github.event.pull_request.labels.*.name, 'PReview'))
 
-    env:
-      GCP_WORKLOAD_IDENTITY_PROVIDER: projects/181168524791/locations/global/workloadIdentityPools/ssg-example/providers/gh-ssg-example
-      GCP_SERVICE_ACCOUNT: gha-ssg-example@teraoka-test-331901.iam.gserviceaccount.com
-      BUCKET_NAME: ssg-example-review-n9k0
-
     uses: ./.github/workflows/reusable-deploy.yaml
     with:
       checkout_ref: ${{ github.ref }}
-      workload-identity-provider: ${{ env.GCP_WORKLOAD_IDENTITY_PROVIDER }}
-      service-account: ${{ env.GCP_SERVICE_ACCOUNT }}
-      bucket-name: ${{ env.BUCKET_NAME }}
-      url: "https://storage.googleapis.com/${BUCKET_NAME}/pr-${{ github.event.pull_request.number }}/index.html"
+      workload-identity-provider: projects/181168524791/locations/global/workloadIdentityPools/ssg-example/providers/gh-ssg-example
+      service-account: gha-ssg-example@teraoka-test-331901.iam.gserviceaccount.com
+      bucket-name: ssg-example-review-n9k0
+      url: "https://storage.googleapis.com/ssg-example-review-n9k0/pr-${{ github.event.pull_request.number }}/index.html"
       issue-number: ${{ github.event.pull_request.number }}
