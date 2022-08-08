@@ -3,7 +3,7 @@ name: Reusable Deploy Workflow
 on:
   workflow_call:
     inputs:
-      workload-identiry-provider:
+      workload-identity-provider:
         required: true
         type: string
       service-account:
