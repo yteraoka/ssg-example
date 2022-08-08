@@ -19,7 +19,7 @@ on:
         required: true
         type: string
       issue-number:
-        requred: false
+        required: false
         type: number
 
 jobs:
