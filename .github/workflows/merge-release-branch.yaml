@@ -167,8 +167,18 @@ jobs:
     runs-on: ubuntu-20.04
 
     steps:
+      - name: Slack の Webhook URL が設定済みかどうか確認
+        id: slack-enabled
+        run: |
+          echo ${{ secrets.SLACK_WEBHOOK_URL }} | grep -q ^http
+          if [ $? -eq 0 ] ; then
+            echo "::set-output name=value::true"
+          else
+            echo "::set-output name=value::false"
+          fi
+
       - name: Slack へ通知
-        if: ${{ secrets.SLACK_WEBHOOK_URL }} != ''
+        if: steps.slack-enabled.outputs.value == 'true'
         uses: slackapi/slack-github-action@v1.19.0
         with:
           payload: |
