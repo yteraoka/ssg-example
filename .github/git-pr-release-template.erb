@@ -1,6 +1,7 @@
 Release <%= Time.now.strftime("%Y-%m-%d") %> (Current Version: <%= ENV['CURRENT_VERSION'] %>)
 
 この Pull Request は手動で Merge せず、GitHub Actions の [[手動]本番デプロイ](https://github.com/yteraoka/ssg-example/actions/workflows/merge-release-branch.yaml) を実行してください
+Workflow の実行時 branch は `<%= ENV['GIT_PR_RELEASE_BRANCH_STAGING'] %>` を選択し、新しい version を指定してください。
 
 <% pull_requests.each do |pr| -%>
 <%=  pr.to_checklist_item %>
