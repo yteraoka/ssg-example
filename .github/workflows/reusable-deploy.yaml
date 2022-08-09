@@ -24,6 +24,9 @@ on:
       preview-id:
         required: false
         type: string
+      api-domain:
+        required: false
+        type: string
 
 jobs:
   deploy-frontend:
@@ -55,6 +58,11 @@ jobs:
           yarn install
         working-directory: ./mysite
 
+      - name: API Server のドメインを置換
+        if: inputs.api-domain != ''
+        run: |
+          sed -i 's/document.domain/${{ inputs.api-domain }}/' ./mysite/src/pages/Index.vue
+
       - name: gridsome build
         run: |
           gridsome build
@@ -82,6 +90,12 @@ jobs:
         run: |
           echo "### デプロイしました! :rocket:" >> $GITHUB_STEP_SUMMARY
           echo "${{ inputs.url }}" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ inputs.api-domain }}" != "" ] ; then
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "Backend: https://${{ inputs.api-domain }}/" >> $GITHUB_STEP_SUMMARY
+            echo "DjangoAdmin: https://${{ inputs.api-domain }}/flux-admin/" >> $GITHUB_STEP_SUMMARY
+            echo "(API Server の AppEngine にアクセスする必要があるため、こちらのドメイン)" >> $GITHUB_STEP_SUMMARY
+          fi
 
       - name: URL を書き込む既存のコメントを検索
         uses: peter-evans/find-comment@v2
@@ -94,7 +108,7 @@ jobs:
 
       - name: Pull Request のコメントに URL を追加
         uses: peter-evans/create-or-update-comment@v2
-        if: inputs.issue-number != ''
+        if: inputs.issue-number != '' && inputs.api-domain == ''
         with:
           comment-id: ${{ steps.fc.outputs.comment-id }}
           issue-number: ${{ inputs.issue-number }}
@@ -103,3 +117,15 @@ jobs:
             レビュー用の URL です
             ${{ inputs.url }}
 
+      - name: Pull Request のコメントに URL を追加 (Custom Backend)
+        if: inputs.issue-number != '' && inputs.api-domain != ''
+        uses: peter-evans/create-or-update-comment@v2
+        with:
+          comment-id: ${{ steps.fc.outputs.comment-id }}
+          issue-number: ${{ inputs.issue-number }}
+          edit-mode: replace
+          body: |
+            レビュー用の URL です
+            https://${{ inputs.url }}
+            Backend
+            https://${{ inputs.api-domain }}/
