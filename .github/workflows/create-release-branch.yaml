@@ -130,7 +130,7 @@ jobs:
 
     uses: ./.github/workflows/reusable-deploy.yaml
     with:
-      checkout_ref: ${{ needs.create-release-branch.outputs.release-branch-name }}
+      checkout-ref: ${{ needs.create-release-branch.outputs.release-branch-name }}
       workload-identity-provider: projects/181168524791/locations/global/workloadIdentityPools/ssg-example/providers/gh-ssg-example
       service-account: gha-ssg-example@teraoka-test-331901.iam.gserviceaccount.com
       bucket-name: ssg-example-staging-n9k0

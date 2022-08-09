@@ -150,7 +150,7 @@ jobs:
 
     uses: ./.github/workflows/reusable-deploy.yaml
     with:
-      checkout_ref: v${{ github.event.inputs.releaseVersion }}
+      checkout-ref: v${{ github.event.inputs.releaseVersion }}
       workload-identity-provider: projects/181168524791/locations/global/workloadIdentityPools/ssg-example/providers/gh-ssg-example
       service-account: gha-ssg-example@teraoka-test-331901.iam.gserviceaccount.com
       bucket-name: ssg-example-prod-n9k0
