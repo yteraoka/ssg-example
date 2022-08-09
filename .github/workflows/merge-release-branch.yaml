@@ -167,7 +167,7 @@ jobs:
     runs-on: ubuntu-20.04
 
     steps:
-     - name: Slack の Webhook URL が設定済みかどうか確認
+      - name: Slack の Webhook URL が設定済みかどうか確認
         id: slack-enabled
         run: |
           echo ${{ secrets.SLACK_WEBHOOK_URL }} | grep -q ^http
