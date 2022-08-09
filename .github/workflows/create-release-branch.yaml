@@ -102,8 +102,19 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Slack の Webhook URL が設定済みかどうか確認
+        id: slack-enabled
+        run: |
+          echo ${{ secrets.SLACK_WEBHOOK_URL }} | grep -q ^http
+          if [ $? -eq 0 ] ; then
+            echo "::set-output name=value::true"
+          else
+            echo "::set-output name=value::false"
+          fi
+
       - name: Slack へ通知
         uses: slackapi/slack-github-action@v1.19.0
+        if: steps.slacke-enabled.outputs.value == 'true'
         with:
           payload: |
             {
