@@ -169,8 +169,8 @@ jobs:
     steps:
       - name: Slack の Webhook URL が設定済みかどうか確認
         id: slack-enabled
-        continue-on-error: true
         run: |
+          set +e
           echo ${{ secrets.SLACK_WEBHOOK_URL2 }} | grep -q ^http
           if [ $? -eq 0 ] ; then
             echo "::set-output name=value::true"
