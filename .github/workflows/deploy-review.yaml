@@ -11,6 +11,38 @@ on:
       - labeled
 
 jobs:
+  find-backend:
+    name: backend service 選定
+
+    runs-on: ubuntu-20.04
+
+    # PReview label がついている場合のみ実行する
+    if: |
+      ((github.event.action == 'labeled') && (github.event.label.name == 'PReview'))
+      ||
+      ((github.event.action == 'synchronize') && contains(github.event.pull_request.labels.*.name, 'PReview'))
+
+    outputs:
+      api-domain: ${{ steps.api-domain.outputs.result }}
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: API Server のドメインを取得
+        id: api-domain
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const description = context.payload.pull_request.body
+            const backend_line = description.split(/\r?\n/).find(str => str.startsWith('backend:'))
+            if (backend_line) {
+              return backend_line.split(':')[1].trim()
+            } else {
+              return "default-backend-server"
+            }
+          result-encoding: string
+
+
   deploy:
     name: レビュー用デプロイ
 
@@ -29,3 +61,4 @@ jobs:
       url: "https://storage.googleapis.com/ssg-example-review-n9k0/pr-${{ github.event.pull_request.number }}/index.html"
       issue-number: ${{ github.event.pull_request.number }}
       preview-id: pr-${{ github.event.pull_request.number }}
+      api-domain: ${{ needs.find-backend.outputs.api-domain }}
