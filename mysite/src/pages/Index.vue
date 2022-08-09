@@ -15,7 +15,6 @@
     </p>
 
     <p>
-      なんか追加
       API Server: document.domain
     </p>
 

@@ -20,17 +20,13 @@ on:
         default: x.y.z
 
 jobs:
-  bump-version-and-merge:
-    name: Version 更新と main への Merge
+  bump-version:
+    name: Version 更新
 
     runs-on: ubuntu-20.04
 
     # release branch を選択しなかった場合は何もしない
     if: startsWith(github.ref_name, 'release/')
-
-    outputs:
-      release-pr-number: ${{ steps.pr-info.outputs.pr-number }}
-      release-pr-url: ${{ steps.pr-info.outputs.pr-url }}
 
     steps:
       - name: release branch を checkout
@@ -44,6 +40,23 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v4.2.0
         with:
           commit_message: Bump version to ${{ github.event.inputs.releaseVersion }}
+
+
+  merge-release-to-main:
+    name: release branch を main に merge
+
+    runs-on: ubuntu-20.04
+
+    needs:
+      - bump-version
+
+    outputs:
+      release-pr-number: ${{ steps.pr-info.outputs.pr-number }}
+      release-pr-url: ${{ steps.pr-info.outputs.pr-url }}
+
+    steps:
+      - name: release branch を checkout
+        uses: actions/checkout@v3
 
       - name: PR の id と URL を取得
         id: pr-info
@@ -71,11 +84,11 @@ jobs:
           MERGE_ERROR_FAIL: true
 
 
-  apply-version-to-develop:
-    name: Version 更新を develop に反映
+  create-pull-request-to-develop:
+    name: Version 更新を develop に反映する Pull Request 作成
 
     needs:
-      - bump-version-and-merge
+      - bump-version
 
     runs-on: ubuntu-20.04
 
@@ -92,6 +105,19 @@ jobs:
             --body "Merge automatically ${{ github.ref_name }} into develop"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+
+  merge-to-develop:
+    name: develop への Pull Request を merge
+
+    needs:
+      - create-pull-request-to-develop
+
+    runs-on: ubuntu-20.04
+
+    steps:
+      - name: release branch を checkout
+        uses: actions/checkout@v3
 
       - name: develop ブランチへの PR の id と URL を取得
         id: develop-pr-info
@@ -123,7 +149,7 @@ jobs:
     name: tag 作成
 
     needs:
-      - apply-version-to-develop
+      - merge-release-to-main
 
     runs-on: ubuntu-20.04
 
@@ -161,7 +187,7 @@ jobs:
     name: Slack へ通知
 
     needs:
-      - bump-version-and-merge
+      - merge-release-to-main
       - deploy-production
 
     runs-on: ubuntu-20.04
@@ -184,13 +210,13 @@ jobs:
         with:
           payload: |
             {
-              "text": "本番にデプロイされました\n${{ needs.bump-version-and-merge.outputs.release-pr-number }}",
+              "text": "本番にデプロイされました\n${{ needs.merge-release-to-main.outputs.release-pr-number }}",
               "blocks": [
                 {
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": "本番に ${{ github.event.inputs.releaseVersion }} <${{ needs.bump-version-and-merge.outputs.release-pr-url }}|PR #${{ needs.bump-version-and-merge.outputs.release-pr-number }}> をデプロイしました。"
+                    "text": "本番に ${{ github.event.inputs.releaseVersion }} <${{ needs.merge-release-to-main.outputs.release-pr-url }}|PR #${{ needs.merge-release-to-main.outputs.release-pr-number }}> をデプロイしました。"
                   }
                 }
               ]
