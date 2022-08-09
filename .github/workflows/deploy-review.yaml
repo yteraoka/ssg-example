@@ -49,6 +49,9 @@ jobs:
   deploy:
     name: レビュー用デプロイ
 
+    needs:
+      - find-backend
+
     # PReview label がついている場合のみ実行する
     if: |
       ((github.event.action == 'labeled') && (github.event.label.name == 'PReview'))
