@@ -126,6 +126,6 @@ jobs:
           edit-mode: replace
           body: |
             レビュー用の URL です
-            https://${{ inputs.domain }}/
+            https://${{ inputs.url }}/
             Backend
             https://${{ inputs.api-domain }}/
