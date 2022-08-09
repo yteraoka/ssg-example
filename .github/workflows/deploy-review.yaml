@@ -35,6 +35,11 @@ jobs:
           script: |
             const description = context.payload.pull_request.body
             const backend_line = description.split(/\r?\n/).find(str => str.startsWith('backend:'))
+            console.log("---")
+            console.log(typeof backend_line)
+            console.log("---")
+            console.log(backend_line)
+            console.log("---")
             if (backend_line) {
               return backend_line.split(':')[1].trim()
             } else {
