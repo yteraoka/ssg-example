@@ -49,9 +49,6 @@ jobs:
 
     runs-on: ubuntu-20.04
 
-    outputs:
-      pr-number: ${{ steps.pr-info.outputs.pr-number }}
-
     steps:
       - name: checkout
         uses: actions/checkout@v3
@@ -90,6 +87,25 @@ jobs:
           GIT_PR_RELEASE_TEMPLATE: '.github/git-pr-release-template.erb'
           CURRENT_VERSION: ${{ steps.current-version.outputs.value }}
           TZ: Asia/Tokyo
+
+
+  # 作成した Pull Request の ID, URL を取得して Slack に通知
+  # slack の webhook URL 未設定で通知しない場合も後続の job で PR の ID などを使うために実行が必要
+  notify-to-slack:
+    name: Slack へ通知
+
+    outputs:
+      pr-number: ${{ steps.pr-info.outputs.pr-number }}
+  
+    needs:
+      - create-release-branch
+      - create-pull-request
+
+    runs-on: ubuntu-20.04
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
 
       # release branch から main branch への Pull Request の id, url を取得
       - name: Get Pull Request URL
@@ -134,11 +150,13 @@ jobs:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
           SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
 
+
   deploy-staging:
     name: Staging への deploy
 
     needs:
       - create-release-branch
+      - notify-to-slack
 
     uses: ./.github/workflows/reusable-deploy.yaml
     with:
@@ -146,5 +164,5 @@ jobs:
       workload-identity-provider: projects/181168524791/locations/global/workloadIdentityPools/ssg-example/providers/gh-ssg-example
       service-account: gha-ssg-example@teraoka-test-331901.iam.gserviceaccount.com
       bucket-name: ssg-example-staging-n9k0
-      issue-number: ${{ needs.create-pull-request.outputs.pr-number }}
+      issue-number: ${{ needs.notify-to-slack.outputs.pr-number }}
       url: "https://storage.googleapis.com/ssg-example-staging-n9k0/index.html"
