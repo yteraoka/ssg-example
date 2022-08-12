@@ -94,10 +94,6 @@ jobs:
         run: |
           pr_number=$(gh pr list --json number,headRefName,baseRefName,url --state open | jq '.[] | select(.headRefName == "${{ github.ref_name }}" and .baseRefName == "main") | .number' -r)
           pr_url=$(gh pr list --json number,headRefName,baseRefName,url --state open | jq '.[] | select(.headRefName == "${{ github.ref_name }}" and .baseRefName == "main") | .url' -r)
-          body_for_release=$(gh pr view ${pr_number} --json body --jq .body | grep ^- | sed 's/- \[.\]/-/')
-          # outputs のために改行を置換
-          body_for_release=${body_for_release//$'\n'/'%0A'}
-          body_for_release=${body_for_release//$'\r'/'%0D'}
           echo "pr_number=${pr_number}"
           echo "pr_url=${pr_url}"
           if [ -z "$pr_number" ] ; then
@@ -115,7 +111,7 @@ jobs:
           MERGE_LABELS: ""
           MERGE_DELETE_BRANCH: false
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-          PULL_REQUEST: "${{ steps.pr-info.outputs.pr_number }}"
+          PULL_REQUEST: "${{ steps.pr-info.outputs.pr-number }}"
           MERGE_ERROR_FAIL: true
 
 
@@ -176,7 +172,7 @@ jobs:
           MERGE_LABELS: ""
           MERGE_DELETE_BRANCH: true
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-          PULL_REQUEST: "${{ steps.develop-pr-info.outputs.pr_number }}"
+          PULL_REQUEST: "${{ steps.develop-pr-info.outputs.pr-number }}"
           MERGE_ERROR_FAIL: true
 
 
