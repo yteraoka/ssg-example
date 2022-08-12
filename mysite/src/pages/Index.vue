@@ -15,6 +15,10 @@
     </p>
 
     <p>
+      あいうえお
+    </p>
+
+    <p>
       API Server: document.domain
     </p>
 
