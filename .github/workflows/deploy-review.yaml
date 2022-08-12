@@ -53,12 +53,6 @@ jobs:
     needs:
       - find-backend
 
-    # PReview label がついている場合のみ実行する
-    if: |
-      ((github.event.action == 'labeled') && (github.event.label.name == 'PReview'))
-      ||
-      ((github.event.action == 'synchronize') && contains(github.event.pull_request.labels.*.name, 'PReview'))
-
     uses: ./.github/workflows/reusable-deploy.yaml
     with:
       checkout-ref: ${{ github.ref }}
