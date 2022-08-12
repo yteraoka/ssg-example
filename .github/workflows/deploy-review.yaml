@@ -33,15 +33,16 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
+            const default_domain = "default-backend-server"
             const description = context.payload.pull_request.body
             if (! description) {
-              return "default-backend-server"
+              return default_domain
             }
             const backend_line = description.split(/\r?\n/).find(str => str.startsWith('backend:'))
             if (backend_line) {
               return backend_line.split(':')[1].trim()
             } else {
-              return "default-backend-server"
+              return default_domain
             }
           result-encoding: string
 
@@ -51,12 +52,6 @@ jobs:
 
     needs:
       - find-backend
-
-    # PReview label がついている場合のみ実行する
-    if: |
-      ((github.event.action == 'labeled') && (github.event.label.name == 'PReview'))
-      ||
-      ((github.event.action == 'synchronize') && contains(github.event.pull_request.labels.*.name, 'PReview'))
 
     uses: ./.github/workflows/reusable-deploy.yaml
     with:
