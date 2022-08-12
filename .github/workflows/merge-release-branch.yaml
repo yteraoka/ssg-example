@@ -20,13 +20,44 @@ on:
         default: x.y.z
 
 jobs:
-  bump-version:
-    name: Version 更新
+  validate-version-tag:
+    name: Version tag の確認
 
     runs-on: ubuntu-20.04
 
     # release branch を選択しなかった場合は何もしない
     if: startsWith(github.ref_name, 'release/')
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: version のフォーマット確認
+        run: |
+          set +e
+          echo "${{ github.event.inputs.releaseVersion }}" | grep -q -E '^[0-9]+\.[0-9]+\.[0-9]+$'
+          if [ $? -ne 0 ] ; then
+            echo "version は x.y.z 形式でなければなりません"
+            exit 1
+          fi
+
+      - name: tag がすでに存在するかどうかを確認
+        run: |
+          git fetch --tags --prune
+          tag=$(git tag --list "v${{ github.event.inputs.releaseVersion }}")
+          if [ "$tag" != "" ] ; then
+            echo "tag v${{ github.event.inputs.releaseVersion }} はすでに存在します"
+            exit 1
+          fi
+
+  bump-version:
+    name: Version 更新
+
+    runs-on: ubuntu-20.04
+
+    needs:
+      - validate-version-tag
 
     steps:
       - name: release branch を checkout
@@ -159,6 +190,12 @@ jobs:
         with:
           ref: main
 
+      - name: HEAD の commit hash を取得
+        id: get-head-hash
+        run: |
+          hash=$(git rev-parse HEAD)
+          echo "::set-output name=commit-ish::${hash}"
+
       - name: tag の作成
         uses: actions/create-release@v1
         env:
@@ -166,6 +203,7 @@ jobs:
         with:
           tag_name: v${{ github.event.inputs.releaseVersion }}
           release_name: v${{ github.event.inputs.releaseVersion }}
+          commitish: ${{ steps.get-head-hash.outputs.commit-ish }}
 
 
   deploy-production:
