@@ -249,13 +249,13 @@ jobs:
         with:
           payload: |
             {
-              "text": "本番にデプロイされました\n${{ needs.merge-release-to-main.outputs.release-pr-number }}",
+              "text": "Production 環境にデプロイされました\n${{ needs.merge-release-to-main.outputs.release-pr-number }}",
               "blocks": [
                 {
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": "本番に ${{ github.event.inputs.releaseVersion }} <${{ needs.merge-release-to-main.outputs.release-pr-url }}|PR #${{ needs.merge-release-to-main.outputs.release-pr-number }}> をデプロイしました。"
+                    "text": "Production 環境に ${{ github.event.inputs.releaseVersion }} <${{ needs.merge-release-to-main.outputs.release-pr-url }}|PR #${{ needs.merge-release-to-main.outputs.release-pr-number }}> をデプロイしました。"
                   }
                 }
               ]
