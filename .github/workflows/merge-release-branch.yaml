@@ -84,7 +84,6 @@ jobs:
     outputs:
       release-pr-number: ${{ steps.pr-info.outputs.pr-number }}
       release-pr-url: ${{ steps.pr-info.outputs.pr-url }}
-      release-body: ${{ steps.pr-info.outputs.release-body }}
 
     steps:
       - name: release branch を checkout
@@ -107,7 +106,6 @@ jobs:
           fi
           echo "::set-output name=pr-number::${pr_number}"
           echo "::set-output name=pr-url::${pr_url}"
-          echo "::set-output name=release-body::${body_for_release}"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -202,15 +200,6 @@ jobs:
           hash=$(git rev-parse HEAD)
           echo "::set-output name=commit-ish::${hash}"
 
-      - name: release body の改行を復元
-        run: |
-          body_for_release="${{ needs.merge-release-to-main.outputs.release-body }}"
-          body_for_release=${body_for_release//'%0A'/$'\n'}
-          body_for_release=${body_for_release//'%0D'/$'\r'}
-          echo "RELEASE_BODY<<EOF" >> $GITHUB_ENV
-          echo "${body_for_release}" >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
-
       - name: tag の作成
         uses: actions/create-release@v1
         env:
@@ -219,7 +208,7 @@ jobs:
           tag_name: v${{ github.event.inputs.releaseVersion }}
           release_name: v${{ github.event.inputs.releaseVersion }}
           commitish: ${{ steps.get-head-hash.outputs.commit-ish }}
-          body: ${{ env.RELEASE_BODY }}
+          body: "Release PR #${{ needs.merge-release-to-main.outputs.release-pr-number }}"
 
 
   deploy-production:
