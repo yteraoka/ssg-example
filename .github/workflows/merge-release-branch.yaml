@@ -38,7 +38,7 @@ jobs:
           set +e
           echo "${{ github.event.inputs.releaseVersion }}" | grep -q -E '^[0-9]+\.[0-9]+\.[0-9]+$'
           if [ $? -ne 0 ] ; then
-            echo "version は x.y.z 形式でなければなりません"
+            echo "version (${{ github.event.inputs.releaseVersion }}) が [0-9]+.[0-9]+.[0-9]+ にマッチしません" >> $GITHUB_STEP_SUMMARY
             exit 1
           fi
 
@@ -47,7 +47,7 @@ jobs:
           git fetch --tags --prune
           tag=$(git tag --list "v${{ github.event.inputs.releaseVersion }}")
           if [ "$tag" != "" ] ; then
-            echo "tag v${{ github.event.inputs.releaseVersion }} はすでに存在します"
+            echo "tag v${{ github.event.inputs.releaseVersion }} はすでに存在します" >> $GITHUB_STEP_SUMMARY
             exit 1
           fi
 
