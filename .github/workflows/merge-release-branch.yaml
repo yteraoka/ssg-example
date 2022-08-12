@@ -84,6 +84,7 @@ jobs:
     outputs:
       release-pr-number: ${{ steps.pr-info.outputs.pr-number }}
       release-pr-url: ${{ steps.pr-info.outputs.pr-url }}
+      release-body: ${{ steps.pr-info.outputs.release-body }}
 
     steps:
       - name: release branch を checkout
@@ -95,6 +96,9 @@ jobs:
           pr_number=$(gh pr list --json number,headRefName,baseRefName,url --state open | jq '.[] | select(.headRefName == "${{ github.ref_name }}" and .baseRefName == "main") | .number' -r)
           pr_url=$(gh pr list --json number,headRefName,baseRefName,url --state open | jq '.[] | select(.headRefName == "${{ github.ref_name }}" and .baseRefName == "main") | .url' -r)
           body_for_release=$(gh pr view ${pr_number} --json body --jq .body | grep ^- | sed 's/- \[.\]/-/')
+          # outputs のために改行を置換
+          body_for_release=${body_for_release//$'\n'/'%0A'}
+          body_for_release=${body_for_release//$'\r'/'%0D'}
           echo "pr_number=${pr_number}"
           echo "pr_url=${pr_url}"
           if [ -z "$pr_number" ] ; then
@@ -103,9 +107,7 @@ jobs:
           fi
           echo "::set-output name=pr-number::${pr_number}"
           echo "::set-output name=pr-url::${pr_url}"
-          echo "BODY_FOR_RELEASE<<EOF" >> $GITHUB_ENV
-          echo "${body_for_release}" >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
+          echo "::set-output name=release-body::${body_for_release}"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -200,6 +202,15 @@ jobs:
           hash=$(git rev-parse HEAD)
           echo "::set-output name=commit-ish::${hash}"
 
+      - name: release body の改行を復元
+        run: |
+          body_for_release="${{ needs.merge-release-to-main.outputs.release-body }}"
+          body_for_release=${body_for_release//'%0A'/$'\n'}
+          body_for_release=${body_for_release//'%0D'/$'\r'}
+          echo "RELEASE_BODY<<EOF" >> $GITHUB_ENV
+          echo "${body_for_release}" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
       - name: tag の作成
         uses: actions/create-release@v1
         env:
@@ -208,7 +219,7 @@ jobs:
           tag_name: v${{ github.event.inputs.releaseVersion }}
           release_name: v${{ github.event.inputs.releaseVersion }}
           commitish: ${{ steps.get-head-hash.outputs.commit-ish }}
-          body: ${{ env.BODY_FOR_RELEASE }}
+          body: ${{ env.RELEASE_BODY }}
 
 
   deploy-production:
