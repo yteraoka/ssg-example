@@ -68,7 +68,7 @@ jobs:
           echo "${{ github.event.inputs.releaseVersion }}" > ./version.txt
 
       - name: Version 情報の更新を Commit
-        uses: stefanzweifel/git-auto-commit-action@v4.2.0
+        uses: stefanzweifel/git-auto-commit-action@v4.14.1
         with:
           commit_message: Bump version to ${{ github.event.inputs.releaseVersion }}
 
