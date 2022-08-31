@@ -39,8 +39,18 @@ provider "registry.terraform.io/hashicorp/google-beta" {
 }
 
 provider "registry.terraform.io/hashicorp/random" {
-  version = "3.3.2"
+  version = "3.4.1"
   hashes = [
-    "h1:Fu0IKMy46WsO5Y6KfuH9IFkkuxZjE/gIcgtB7GWkTtc=",
+    "h1:4GMIOB7+EhliINd5wiJnV2isZ/6VFVbhnZ1tWolc6XM=",
+    "h1:4kYv7qnRl7RWaDmkbT0uKzlnZXNL7CTSLG2WSzenu7w=",
+    "h1:FtC5qbkmrkD2ukA76ccvjdDBU5r0s7UKx5ku1iBhX+8=",
+    "h1:HxdlWmD6/7iURHAj8wm5yrmkvK0q9w0FJ91H1qVeK4c=",
+    "h1:NfxR2vBvEEfI0nA7FiL+QMuWFnC6rl2avzQ9+ykoSo4=",
+    "h1:Q+1ZwDtRYtFZLrPfpe9wnz7ulNvotLfM6WmwXFCGnSA=",
+    "h1:fmryVKmA3A0Biuusq7xrB1jWB7uJF5V1OjdgrRXKj9w=",
+    "h1:gveAzKTj7/ji9kYyW9BoxmJ8TUHulmwhHaodm5dLfr4=",
+    "h1:iIU3hLNRbMQxZ37ATr5P9SWlAUiX8Q22ccLYaB0P6H4=",
+    "h1:oY44nkdkR7wUmB2rBAPUeNFbhldP9M+8lNcp8YQxRvY=",
+    "h1:tHwxkMmT5lV0jFsUaEDJav+S1KJXUF20UL3ympHE5UY=",
   ]
 }
