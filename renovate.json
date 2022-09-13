@@ -2,5 +2,14 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
     "config:base"
+  ],
+  "packageRules": [
+    {
+      "matchManagers": ["terraform"],
+      "matchPackageNames": ["google", "google-beta"],
+      "groupName": "Google Terraform providers",
+      "addLabels": ["terraform-provider-version"],
+      "branchPrefix": "renovate/terraform-provider-version/"
+    }
   ]
 }
