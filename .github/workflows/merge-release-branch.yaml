@@ -106,7 +106,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: main ブランチへの PR を Merge する
-        uses: pascalgn/automerge-action@v0.15.3
+        uses: pascalgn/automerge-action@v0.15.6
         env:
           MERGE_LABELS: ""
           MERGE_DELETE_BRANCH: false
@@ -167,7 +167,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Auto merge develop
-        uses: pascalgn/automerge-action@v0.15.3
+        uses: pascalgn/automerge-action@v0.15.6
         env:
           MERGE_LABELS: ""
           MERGE_DELETE_BRANCH: true
