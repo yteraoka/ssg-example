@@ -10,6 +10,18 @@
       "groupName": "Google Terraform providers",
       "addLabels": ["terraform-provider-version"],
       "branchPrefix": "renovate/terraform-provider-version/"
+    },
+    {
+      "matchManagers": ["terraform"],
+      "matchDepTypes": ["required_version"],
+      "groupName": "Terraform",
+      "addLabels": ["terraform-version"]
+    },
+    {
+      "matchManagers": ["asdf"],
+      "matchPackageNames": ["hashicorp/terraform"],
+      "groupName": "Terraform",
+      "addLabels": ["terraform-version"]
     }
   ]
 }
