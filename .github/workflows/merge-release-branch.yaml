@@ -23,7 +23,7 @@ jobs:
   validate-version-tag:
     name: Version tag の確認
 
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
 
     # release branch を選択しなかった場合は何もしない
     if: startsWith(github.ref_name, 'release/')
@@ -54,7 +54,7 @@ jobs:
   bump-version:
     name: Version 更新
 
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
 
     needs:
       - validate-version-tag
@@ -76,7 +76,7 @@ jobs:
   merge-release-to-main:
     name: release branch を main に merge
 
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
 
     needs:
       - bump-version
@@ -121,7 +121,7 @@ jobs:
     needs:
       - bump-version
 
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
 
     steps:
       - name: release branch を checkout
@@ -144,7 +144,7 @@ jobs:
     needs:
       - create-pull-request-to-develop
 
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
 
     steps:
       - name: release branch を checkout
@@ -182,7 +182,7 @@ jobs:
     needs:
       - merge-release-to-main
 
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
 
     steps:
       - name: main branch を checkout
@@ -229,7 +229,7 @@ jobs:
       - merge-release-to-main
       - deploy-production
 
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
 
     steps:
       - name: Slack の Webhook URL が設定済みかどうか確認
