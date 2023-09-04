@@ -19,7 +19,7 @@ jobs:
 
     steps:
       - name: checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: develop
 
@@ -51,7 +51,7 @@ jobs:
 
     steps:
       - name: checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
           ref: ${{ needs.create-release-branch.outputs.release-branch-name }}
@@ -106,7 +106,7 @@ jobs:
 
     steps:
       - name: checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       # release branch から main branch への Pull Request の id, url を取得
       - name: Get Pull Request URL

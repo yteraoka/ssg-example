@@ -26,7 +26,7 @@ jobs:
       api-domain: ${{ steps.api-domain.outputs.result }}
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: API Server のドメインを取得
         id: api-domain

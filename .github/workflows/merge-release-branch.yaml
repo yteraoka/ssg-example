@@ -29,7 +29,7 @@ jobs:
     if: startsWith(github.ref_name, 'release/')
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -61,7 +61,7 @@ jobs:
 
     steps:
       - name: release branch を checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Version ファイルを更新
         run: |
@@ -87,7 +87,7 @@ jobs:
 
     steps:
       - name: release branch を checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: PR の id と URL を取得
         id: pr-info
@@ -125,7 +125,7 @@ jobs:
 
     steps:
       - name: release branch を checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: develop ブランチへの PR 作成
         run: |
@@ -148,7 +148,7 @@ jobs:
 
     steps:
       - name: release branch を checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: develop ブランチへの PR の id と URL を取得
         id: develop-pr-info
@@ -186,7 +186,7 @@ jobs:
 
     steps:
       - name: main branch を checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: main
 
