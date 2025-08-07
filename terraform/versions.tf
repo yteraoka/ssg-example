@@ -5,7 +5,7 @@ terraform {
       version = "~> 6.47.0"
     }
     google-beta = {
-      version = "~> 6.24.0"
+      version = "~> 6.47.0"
     }
     random = {
       version = "~> 3.7.0"
