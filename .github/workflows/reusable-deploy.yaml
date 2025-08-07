@@ -107,7 +107,7 @@ jobs:
           body-includes: レビュー用の URL です
 
       - name: Pull Request のコメントに URL を追加
-        uses: peter-evans/create-or-update-comment@v3
+        uses: peter-evans/create-or-update-comment@v4
         if: inputs.issue-number != '' && inputs.api-domain == ''
         with:
           comment-id: ${{ steps.fc.outputs.comment-id }}
@@ -119,7 +119,7 @@ jobs:
 
       - name: Pull Request のコメントに URL を追加 (Custom Backend)
         if: inputs.issue-number != '' && inputs.api-domain != ''
-        uses: peter-evans/create-or-update-comment@v3
+        uses: peter-evans/create-or-update-comment@v4
         with:
           comment-id: ${{ steps.fc.outputs.comment-id }}
           issue-number: ${{ inputs.issue-number }}
