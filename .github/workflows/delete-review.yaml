@@ -40,7 +40,7 @@ jobs:
           gcloud alpha storage rm -r gs://${BUCKET_NAME}/pr-${{ github.event.pull_request.number }} || true
 
       - name: URL を書き込む既存のコメントを検索
-        uses: peter-evans/find-comment@v2
+        uses: peter-evans/find-comment@v3
         id: fc
         with:
           issue-number: ${{ github.event.pull_request.number }}
