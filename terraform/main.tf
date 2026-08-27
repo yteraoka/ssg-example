@@ -1,6 +1,6 @@
 module "gh_oidc" {
   source  = "terraform-google-modules/github-actions-runners/google//modules/gh-oidc"
-  version = "v5.0.0"
+  version = "v5.1.0"
 
   project_id  = var.project_id
   pool_id     = "ssg-example"
